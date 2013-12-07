@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>637</width>
+    <height>462</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QGraphicsView" name="graphicsView">
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>637</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Setting</string>
+    </property>
+    <addaction name="actionLanguage"/>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuVisitImages">
+    <property name="title">
+     <string>Browse Images</string>
+    </property>
+    <addaction name="actionTrainSet"/>
+    <addaction name="separator"/>
+    <addaction name="actionNextImage"/>
+    <addaction name="actionPreviousImage"/>
+    <addaction name="actionAnimation"/>
+    <addaction name="actionFirstImage"/>
+    <addaction name="actionLastImage"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menuVisitImages"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionSettings"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="navigatorToolBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionFirstImage"/>
+   <addaction name="actionPreviousImage"/>
+   <addaction name="actionAnimation"/>
+   <addaction name="actionNextImage"/>
+   <addaction name="actionLastImage"/>
+  </widget>
+  <action name="actionLanguage">
+   <property name="text">
+    <string>Language</string>
+   </property>
+  </action>
+  <action name="actionTrainSet">
+   <property name="text">
+    <string>Train Set</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/image/resource/settings.png</normaloff>
+     <normalon>:/image/resource/settings.png</normalon>:/image/resource/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionNextImage">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/image/resource/next.png</normaloff>:/image/resource/next.png</iconset>
+   </property>
+   <property name="text">
+    <string>Next Image</string>
+   </property>
+  </action>
+  <action name="actionPreviousImage">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/image/resource/previos.png</normaloff>:/image/resource/previos.png</iconset>
+   </property>
+   <property name="text">
+    <string>Previous Image</string>
+   </property>
+   <property name="toolTip">
+    <string>PreviousImage</string>
+   </property>
+  </action>
+  <action name="actionAnimation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <selectedoff>:/image/resource/play.png</selectedoff>
+     <selectedon>:/image/resource/pause.png</selectedon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Animation</string>
+   </property>
+  </action>
+  <action name="actionFirstImage">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/image/resource/first.png</normaloff>:/image/resource/first.png</iconset>
+   </property>
+   <property name="text">
+    <string>First Image</string>
+   </property>
+  </action>
+  <action name="actionLastImage">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/image/resource/last.png</normaloff>:/image/resource/last.png</iconset>
+   </property>
+   <property name="text">
+    <string>Last Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Last Image</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>
