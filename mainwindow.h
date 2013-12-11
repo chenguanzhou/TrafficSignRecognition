@@ -21,15 +21,17 @@ public:
 
 private slots:   
     void on_actionSettings_triggered();
-    void on_actionTrainSet_triggered();
     void on_actionNextImage_triggered();
     void on_actionPreviousImage_triggered();
     void on_animate();
     void on_actionAnimation_toggled(bool arg1);
-
     void on_actionFirstImage_triggered();
-
     void on_actionLastImage_triggered();
+    void on_actionTestCanny_triggered();
+    void on_actionSetTrainData_triggered();
+    void on_actionBrowseTestSet_triggered();
+
+    void on_actionSVMTraining_triggered();
 
 private:
     Ui::MainWindow *ui;

@@ -16,11 +16,15 @@ public:
     ~SettingDialog();
 
 private slots:
-    void InitParams();
+    void ReadParams();
+    void WriteParams();
     void on_pushButtonTrainSetBrowse_clicked();
     void on_pushButtonTestSetBrowse_clicked();
-
     void on_buttonBox_accepted();
+
+    void on_pushButtonTestSetBrowseSVM_clicked();
+
+    void on_pushButtonTestSetBrowseMLP_clicked();
 
 private:
     Ui::SettingDialog *ui;
