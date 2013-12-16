@@ -11,25 +11,46 @@ void SignRecognitionToolkit::GetTestImageCrop(const cv::Mat &inputImage, std::ve
 {
     cv::Mat hsv;
     cv::cvtColor(inputImage,hsv,cv::COLOR_BGR2Lab);
+    //    std::vector<cv::Mat> splitMat;
+    //    cv::split(hsv,splitMat);
+    //    uchar *p,*q;
+    //    cv::Mat red = splitMat[1].clone();
+    //    for(int i = 0; i < red.rows; ++i)
+    //    {
+    //        p = red.ptr<uchar>(i);
+    //        q = splitMat[2].ptr<uchar>(i);
+    //        for (int j=0;j<red.cols;++j)
+    //        {
+    //            if (p[j]>160)
+    //                p[j] = 255;
+    //            else
+    //                p[j] = 0;
+    //        }
+    //    }
+
     std::vector<cv::Mat> splitMat;
-
-    cv::split(hsv,splitMat);
-    cv::Mat red = splitMat[1].clone();
-
-    uchar *p,*q;
+    cv::split(inputImage,splitMat);
+    cv::Mat red = splitMat[2].clone();
+    uchar *p,*r,*g,*b;
     for(int i = 0; i < red.rows; ++i)
     {
         p = red.ptr<uchar>(i);
-        q = splitMat[2].ptr<uchar>(i);
+        r = splitMat[2].ptr<uchar>(i);
+        g = splitMat[1].ptr<uchar>(i);
+        b = splitMat[0].ptr<uchar>(i);
         for (int j=0;j<red.cols;++j)
         {
-            if (p[j]>160)
+            if (r[j]>2*g[j]&&r[j]>2*b[j])
                 p[j] = 255;
             else
                 p[j] = 0;
         }
     }
-    cv::Canny(red,red,50,200);
+
+
+
+//    cv::Canny(red,red,50,200);
+
 
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -48,9 +69,15 @@ void SignRecognitionToolkit::GetTestImageCrop(const cv::Mat &inputImage, std::ve
         if( ellipse.boundingRect().area() > 200 && elongation<1.3)
         {
             minEllipse.push_back(ellipse);
+            CvScalar color;
+            color.val[0]=255;color.val[1]=0;color.val[2]=0;
+            cv::ellipse(red,ellipse,color,2);
         }
     }
 
+    cv::imshow("red",red);
+
+    qDebug()<<"minEllipse.size():"<<minEllipse.size();
     vecCropImage.clear();
     for( int i = 0; i < minEllipse.size(); i++ )
     {
@@ -107,10 +134,10 @@ std::vector<cv::Mat> SignRecognitionToolkit::GetTrainImageCrops(const QStringLis
         cv::Mat src = cv::imread(imageName.toStdString());
         cv::Mat dst = src(cv::Rect(nXOff, nYOff, nXEnd-nXOff, nYEnd-nYOff));
         cv::resize(dst,dst,cv::Size(30,30),0,0,cv::INTER_AREA);
-//        cv::imshow("hehe",dst);
-//        cv::waitKey(1000);
+        //        cv::imshow("hehe",dst);
+        //        cv::waitKey(1000);
         listMat.push_back(dst);
-    }    
+    }
 }
 
 cv::Mat SignRecognitionToolkit::GetCropFeature(const cv::Mat &crop, FeatureMethod method)
@@ -127,8 +154,8 @@ cv::Mat SignRecognitionToolkit::GetCropFeature(const cv::Mat &crop, FeatureMetho
         *p++ = cv::mean(vecCrop[0])[0]/256.;//MB
 
         cv::Mat gray = vecCrop[2]*0.49 + vecCrop[1]*0.29 + vecCrop[2]*0.22;
-//        cv::imshow("hehe",gray);
-//        cv::waitKey();
+        //        cv::imshow("hehe",gray);
+        //        cv::waitKey();
         float treshold = cv::mean(gray)[0];
         //vh
         for (int i=0;i<30;++i)
@@ -140,7 +167,7 @@ cv::Mat SignRecognitionToolkit::GetCropFeature(const cv::Mat &crop, FeatureMetho
                 if (dn>treshold)
                     vh += treshold;
             }
-            *p++ = vh/30;
+            *p++ = vh/30./256.;
         }
 
         for (int i=0;i<30;++i)
@@ -152,7 +179,7 @@ cv::Mat SignRecognitionToolkit::GetCropFeature(const cv::Mat &crop, FeatureMetho
                 if (dn>treshold)
                     vh += treshold;
             }
-            *p++ = vh/30;
+            *p++ = vh/30./256.;
         }
     }
 

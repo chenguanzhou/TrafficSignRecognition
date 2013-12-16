@@ -19,10 +19,10 @@ public:
 
     SignRecognitionToolkit();
 
-    static void             GetTestImageCrop        (const cv::Mat &inputImage, std::vector<cv::Mat> &vecCropImage);
+    static void                 GetTestImageCrop        (const cv::Mat &inputImage, std::vector<cv::Mat> &vecCropImage);
     static std::vector<cv::Mat> GetTrainImageCrops      (const QStringList &inputFileList,const QString &xmlPath);
-    static cv::Mat          GetCropFeature          (const cv::Mat &crop, FeatureMethod method);
-    static cv::Mat          CreateFeatureMat        (const QVector<cv::Mat>& crops);
+    static cv::Mat              GetCropFeature          (const cv::Mat &crop, FeatureMethod method);
+    static cv::Mat              CreateFeatureMat        (const QVector<cv::Mat>& crops);
 
 };
 

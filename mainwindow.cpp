@@ -3,6 +3,7 @@
 #include "settingdialog.h"
 #include <QSettings>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QDir>
 #include <QHBoxLayout>
 #include <QGraphicsPixmapItem>
@@ -66,7 +67,7 @@ void MainWindow::on_actionAnimation_toggled(bool arg1)
 {
     if (arg1==true)
     {
-        timer->start(50);
+        timer->start(25);
         ui->actionAnimation->setToolTip(tr("Pause"));
     }
     else
@@ -109,7 +110,7 @@ void MainWindow::ShowCurrentImage()
     QImage image(imageFileList.at(imageListID).filePath());
     QGraphicsPixmapItem *item= new QGraphicsPixmapItem( QPixmap::fromImage(image));
     graphicsScene->addItem(item);
-    ui->graphicsView->fitInView(QRectF(0, 0, graphicsScene->width(), graphicsScene->height()));
+    ui->graphicsView->fitInView((QGraphicsItem *)item,Qt::KeepAspectRatio);
     lineEditCurrentID->setText(QString().number(imageListID+1)+"/"+QString().number(imageFileList.size()));
     ++imageListID;
 }
@@ -117,7 +118,24 @@ void MainWindow::ShowCurrentImage()
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     QMainWindow::resizeEvent(event);
-    ui->graphicsView->fitInView(QRectF(0, 0, graphicsScene->width(), graphicsScene->height()));
+
+    if (graphicsScene->items().size() != 0)
+        ui->graphicsView->fitInView(graphicsScene->items()[0],Qt::KeepAspectRatio);
+}
+
+void MainWindow::SetEnableNavigateActions(bool enabled)
+{
+    ui->actionFirstImage->setEnabled(enabled);
+    ui->actionLastImage->setEnabled(enabled);
+    ui->actionNextImage->setEnabled(enabled);
+    ui->actionPreviousImage->setEnabled(enabled);
+    ui->actionAnimation->setEnabled(enabled);
+}
+
+void MainWindow::SetSingleImageActions(bool enabled)
+{
+    ui->actionSVMTestingForSingleImage->setEnabled(enabled);
+    ui->actionMLPTestingForSingleImage->setEnabled(enabled);
 }
 
 
@@ -163,11 +181,9 @@ void MainWindow::on_actionBrowseTestSet_triggered()//浏览TestSet
         return;
     }
     imageListID = 0;
-    ui->actionFirstImage->setEnabled(true);
-    ui->actionLastImage->setEnabled(true);
-    ui->actionNextImage->setEnabled(true);
-    ui->actionPreviousImage->setEnabled(true);
-    ui->actionAnimation->setEnabled(true);
+    SetEnableNavigateActions(true);
+    SetSingleImageActions(false);
+    lineEditCurrentID->setText(QString());
     ShowCurrentImage();
 }
 
@@ -201,11 +217,70 @@ void MainWindow::on_actionSVMTraining_triggered()
         {
             samples.push_back(SignRecognitionToolkit::GetCropFeature(*iter,SignRecognitionToolkit::PAPER_63));
         }
-        cv::Mat res(some_samples.size(),1,CV_32SC1,cv::Scalar(i));
+        cv::Mat res(some_samples.size(),1,CV_32SC1);
+        for (int k=0;k<some_samples.size();++k)
+        {
+            * (res.ptr<int>(k))=i;
+        }
         response.push_back(res);
     }
     setting.endGroup();
 
+    std::cout<<samples(cv::Rect(0,0,3,samples.rows))<<std::endl;
+
+//    cv::imshow("hehe",samples);
+//    cv::waitKey();
+
     classifier.train(samples,response);
     classifier.save(svmFile.toStdString().c_str(),"svm");
+    QMessageBox::information(this,tr("Completed!"),tr("Completed svm training!"));
+}
+
+void MainWindow::on_actionOpenSingleImage_triggered()
+{
+    singleImagePath = QFileDialog::getOpenFileName(this,tr("Open an image file"),singleImagePath,"*.bmp *.jpg *.ppm *.png");
+    if (!singleImagePath.isEmpty())
+    {
+        QImage image(singleImagePath);
+        if (image.isNull() == true)
+        {
+            QMessageBox::warning(this,tr("Error"),tr("Open image file ")+singleImagePath+tr(" failed"));
+            return ;
+        }
+        graphicsScene->clear();
+        QGraphicsPixmapItem *item= new QGraphicsPixmapItem( QPixmap::fromImage(image));
+        graphicsScene->addItem(item);
+        ui->graphicsView->fitInView(item,Qt::KeepAspectRatio);
+        SetEnableNavigateActions(false);
+        SetSingleImageActions(true);
+    }
+}
+
+void MainWindow::on_actionSVMTestingForSingleImage_triggered()
+{
+    cv::SVM classifier;
+    QSettings setting("config.ini",QSettings::IniFormat);
+    setting.beginGroup("Classifier");
+    QString svmFile = setting.value("SVMClassifier").toString();
+    setting.endGroup();
+    if (!svmFile.isEmpty())
+        classifier.load(svmFile.toStdString().c_str(),"svm");
+
+    cv::Mat src = cv::imread(singleImagePath.toStdString());
+    std::vector<cv::Mat> crops;
+    SignRecognitionToolkit::GetTestImageCrop(src,crops);
+    qDebug()<<"crops.size():"<<crops.size();
+    for (int i=0;i<crops.size();++i)
+    {
+        cv::Mat feature = SignRecognitionToolkit::GetCropFeature(crops[i],SignRecognitionToolkit::PAPER_63);
+        uchar* p =crops[i].ptr<uchar>(0);
+        std::cout<<feature<<std::endl;
+        int nFlag = classifier.predict(feature);
+        QMessageBox::information(this,tr("result"),tr("This belongs to the ")+QString::number(nFlag+1)+tr("th class!"));
+    }
+}
+
+void MainWindow::on_actionMLPTestingForSingleImage_triggered()
+{
+
 }

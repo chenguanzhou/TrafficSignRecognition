@@ -27,9 +27,7 @@ private slots:
     void on_pushButtonAdd_clicked();
     void on_TrainDialog_accepted();
     void on_pushButtonRemove_clicked();
-
     void on_pushButtonRemoveAll_clicked();
-
     void on_buttonBox_accepted();
 
 private:

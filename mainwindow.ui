@@ -44,8 +44,9 @@
     <property name="title">
      <string>Browse Images</string>
     </property>
-    <addaction name="actionBrowseTestSet"/>
+    <addaction name="actionOpenSingleImage"/>
     <addaction name="separator"/>
+    <addaction name="actionBrowseTestSet"/>
     <addaction name="actionNextImage"/>
     <addaction name="actionPreviousImage"/>
     <addaction name="actionAnimation"/>
@@ -65,7 +66,10 @@
     <addaction name="actionSetTrainData"/>
     <addaction name="separator"/>
     <addaction name="actionMLP_Detect"/>
+    <addaction name="actionMLPTestingForSingleImage"/>
+    <addaction name="separator"/>
     <addaction name="actionSVMTraining"/>
+    <addaction name="actionSVMTestingForSingleImage"/>
    </widget>
    <addaction name="menuVisitImages"/>
    <addaction name="menuWorkFlow"/>
@@ -105,10 +109,10 @@
   </action>
   <action name="actionBrowseTestSet">
    <property name="text">
-    <string>Browse Test Set</string>
+    <string>Load Test Image Sequences </string>
    </property>
    <property name="toolTip">
-    <string>Browse Test Set</string>
+    <string>Load Test Image Sequences </string>
    </property>
   </action>
   <action name="actionSettings">
@@ -213,6 +217,27 @@
   <action name="actionSVMTraining">
    <property name="text">
     <string>SVM Training</string>
+   </property>
+  </action>
+  <action name="actionOpenSingleImage">
+   <property name="text">
+    <string>Open Single Image</string>
+   </property>
+  </action>
+  <action name="actionSVMTestingForSingleImage">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>SVM Testing For Single Image</string>
+   </property>
+  </action>
+  <action name="actionMLPTestingForSingleImage">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>MLP Testing For Single Image</string>
    </property>
   </action>
  </widget>

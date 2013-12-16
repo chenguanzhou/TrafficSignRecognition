@@ -30,8 +30,10 @@ private slots:
     void on_actionTestCanny_triggered();
     void on_actionSetTrainData_triggered();
     void on_actionBrowseTestSet_triggered();
-
     void on_actionSVMTraining_triggered();
+    void on_actionOpenSingleImage_triggered();
+    void on_actionSVMTestingForSingleImage_triggered();
+    void on_actionMLPTestingForSingleImage_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -40,8 +42,12 @@ private:
     QList<QFileInfo> imageFileList;
     QTimer *timer;
     int imageListID;
+    QString singleImagePath;
+
     void ShowCurrentImage();
     void resizeEvent(QResizeEvent *event);
+    void SetEnableNavigateActions(bool enabled);
+    void SetSingleImageActions(bool enabled);
 };
 
 #endif // MAINWINDOW_H
