@@ -5,8 +5,9 @@
 #include <QListWidget>
 #include <QSettings>
 
-TrainDialog::TrainDialog(QWidget *parent) :
+TrainDialog::TrainDialog(bool isTraining,QWidget *parent) :
     QDialog(parent),
+    isTrain(isTraining),
     ui(new Ui::TrainDialog)
 {
     ui->setupUi(this);
@@ -20,40 +21,51 @@ TrainDialog::~TrainDialog()
 
 void TrainDialog::on_pushButtonAdd_clicked()
 {
-    ui->tabWidget->addTab(new TrainTab(),tr("The ")+QString::number(ui->tabWidget->count()+1)+tr("th Class"));
+    TrainTab *tab = new TrainTab(isTrain);
+    trainTab.push_back(tab);
+    ui->tabWidget->addTab(tab,tr("The ")+QString::number(ui->tabWidget->count()+1)+tr("th Class"));
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
 }
 
-void TrainDialog::on_TrainDialog_accepted()
-{
-
-}
 
 void TrainDialog::InitWidget()
 {
     QSettings setting("config.ini",QSettings::IniFormat);
-    setting.beginGroup("TrainDataConfig");
+    if (isTrain)
+    {
+        setting.beginGroup("TrainDataConfig");
+        setWindowTitle(tr("Set Training Data"));
+    }
+    else
+    {
+        setting.beginGroup("TestDataConfig");
+        setWindowTitle(tr("Set Test Data"));
+    }
     int ClassCount = setting.value("Count").toInt();
     if (ClassCount == 0)  return;
+
+
     for (int i=0;i<ClassCount;++i)
     {
         QStringList stringList=setting.value(QString("Class")+QString::number(i)+"_Files").toStringList();
         QString configPath = setting.value(QString("Class")+QString::number(i)+"_Config").toString();
-        TrainTab *tab = new TrainTab();
+        TrainTab *tab = new TrainTab(isTrain);
         tab->SetImageItems(stringList);
         tab->SetConfigPath(configPath);
         ui->tabWidget->addTab(tab,tr("The ")+QString::number(ui->tabWidget->count()+1)+tr("th Class"));
+        trainTab.push_back(tab);
     }
     setting.endGroup();
 }
 
 void TrainDialog::SaveTrainDataInfo()
 {
-    QList<TrainTab*> trainTab = ui->tabWidget->findChildren<TrainTab *>();
-
     int index = 0;
     QSettings setting("config.ini",QSettings::IniFormat);
-    setting.beginGroup("TrainDataConfig");
+    if (isTrain)
+        setting.beginGroup("TrainDataConfig");
+    else
+        setting.beginGroup("TestDataConfig");
     setting.setValue("Count",QVariant(trainTab.size()));
     foreach (TrainTab* tab, trainTab)
     {
@@ -76,12 +88,14 @@ void TrainDialog::on_pushButtonRemove_clicked()
     if (ui->tabWidget->count()==0)
         return;
     ui->tabWidget->removeTab(ui->tabWidget->currentIndex());
+    trainTab.removeAt(ui->tabWidget->currentIndex());
     RenameWindowTitle();
 }
 
 void TrainDialog::on_pushButtonRemoveAll_clicked()
 {
     ui->tabWidget->clear();
+    trainTab.clear();
 }
 
 void TrainDialog::on_buttonBox_accepted()

@@ -12,7 +12,7 @@ class TrainTab : public QWidget
     Q_OBJECT
 
 public:
-    explicit TrainTab(QWidget *parent = 0);
+    explicit TrainTab(bool isTraining, QWidget *parent = 0);
     ~TrainTab();
 
     void SetImageItems(const QStringList &list);
@@ -32,6 +32,7 @@ private slots:
 
 private:
     Ui::TrainTab *ui;
+    bool isTrain;
 };
 
 #endif // TRAINTAB_H

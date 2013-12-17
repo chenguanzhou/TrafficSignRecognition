@@ -18,18 +18,21 @@ SOURCES += main.cpp\
     settingdialog.cpp \
     traindialog.cpp \
     traintab.cpp \
-    SignRecognitionToolkit.cpp
+    SignRecognitionToolkit.cpp \
+    mlpdialog.cpp
 
 HEADERS  += mainwindow.h \
     settingdialog.h \
     traindialog.h \
     traintab.h \
-    SignRecognitionToolkit.h
+    SignRecognitionToolkit.h \
+    mlpdialog.h
 
 FORMS    += mainwindow.ui \
     settingdialog.ui \
     traindialog.ui \
-    traintab.ui
+    traintab.ui \
+    mlpdialog.ui
 
 win32:LIBS += -lopencv_core247 -lopencv_imgproc247  -lopencv_highgui247  -lopencv_ml247
 unix: LIBS += -lopencv_core -lopencv_imgproc  -lopencv_highgui  -lopencv_ml

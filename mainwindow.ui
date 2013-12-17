@@ -64,9 +64,11 @@
      <string>WorkFlow</string>
     </property>
     <addaction name="actionSetTrainData"/>
+    <addaction name="actionSetTestData"/>
     <addaction name="separator"/>
-    <addaction name="actionMLP_Detect"/>
+    <addaction name="actionMLPTraining"/>
     <addaction name="actionMLPTestingForSingleImage"/>
+    <addaction name="actionMLPTestingForTestData"/>
     <addaction name="separator"/>
     <addaction name="actionSVMTraining"/>
     <addaction name="actionSVMTestingForSingleImage"/>
@@ -201,17 +203,17 @@
     <string>Test Canny</string>
    </property>
   </action>
-  <action name="actionMLP_Detect">
+  <action name="actionMLPTraining">
    <property name="text">
     <string>MLP Training</string>
    </property>
   </action>
   <action name="actionSetTrainData">
    <property name="text">
-    <string>Set Sample Data</string>
+    <string>Set Train Data</string>
    </property>
    <property name="toolTip">
-    <string>Set Sample Data</string>
+    <string>Set Train Data</string>
    </property>
   </action>
   <action name="actionSVMTraining">
@@ -238,6 +240,16 @@
    </property>
    <property name="text">
     <string>MLP Testing For Single Image</string>
+   </property>
+  </action>
+  <action name="actionSetTestData">
+   <property name="text">
+    <string>Set Test Data</string>
+   </property>
+  </action>
+  <action name="actionMLPTestingForTestData">
+   <property name="text">
+    <string>MLP Testing For TestData</string>
    </property>
   </action>
  </widget>

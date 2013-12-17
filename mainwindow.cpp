@@ -11,6 +11,7 @@
 #include <QLineEdit>
 #include "SignRecognitionToolkit.h"
 #include "traindialog.h"
+#include "mlpdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -138,11 +139,17 @@ void MainWindow::SetSingleImageActions(bool enabled)
     ui->actionMLPTestingForSingleImage->setEnabled(enabled);
 }
 
-
-
 void MainWindow::on_actionSetTrainData_triggered()
 {
-    TrainDialog *dlg = new TrainDialog();
+    TrainDialog *dlg = new TrainDialog(true);
+    dlg->setModal(true);
+    dlg->exec();
+    delete dlg;
+}
+
+void MainWindow::on_actionSetTestData_triggered()
+{
+    TrainDialog *dlg = new TrainDialog(false);
     dlg->setModal(true);
     dlg->exec();
     delete dlg;
@@ -226,8 +233,6 @@ void MainWindow::on_actionSVMTraining_triggered()
     }
     setting.endGroup();
 
-    std::cout<<samples(cv::Rect(0,0,3,samples.rows))<<std::endl;
-
 //    cv::imshow("hehe",samples);
 //    cv::waitKey();
 
@@ -274,13 +279,140 @@ void MainWindow::on_actionSVMTestingForSingleImage_triggered()
     {
         cv::Mat feature = SignRecognitionToolkit::GetCropFeature(crops[i],SignRecognitionToolkit::PAPER_63);
         uchar* p =crops[i].ptr<uchar>(0);
-        std::cout<<feature<<std::endl;
+
         int nFlag = classifier.predict(feature);
         QMessageBox::information(this,tr("result"),tr("This belongs to the ")+QString::number(nFlag+1)+tr("th class!"));
     }
 }
 
+
+
+void MainWindow::on_actionMLPTraining_triggered()
+{
+//    cv::NeuralNet_MLP classifier;
+//    QSettings setting("config.ini",QSettings::IniFormat);
+//    setting.beginGroup("Classifier");
+//    QString mlpFile = setting.value("MLPClassifier").toString();
+//    setting.endGroup();
+//    if (mlpFile.isEmpty())
+//    {
+//        cv::Mat layerSizes=(cv::Mat_<int>(1,3) << 63,5,3);
+//        classifier.create(layerSizes);
+//    }
+//    else
+//    {
+//        classifier.load(mlpFile.toStdString().c_str(),"mlp");
+//    }
+
+//    setting.beginGroup("TrainDataConfig");
+//    bool isValid = false;
+//    int ClassCount = setting.value("Count").toInt(&isValid);
+//    if (isValid==false || ClassCount <= 0)
+//    {
+//        QMessageBox::critical(this,tr("Train failed!"),tr("Training Data hasn't been set!"));
+//        return;
+//    }
+
+    MLPDialog *dlg = new MLPDialog();
+    dlg->show();
+//    cv::NeuralNet_MLP classifier = dlg.GetMLPClassifier();
+//    cv::ANN_MLP_TrainParams params = dlg.GetMLPParam();
+
+//    cv::Mat samples;
+//    cv::Mat response;
+//    for (int i=0;i<ClassCount;++i)
+//    {
+//        QStringList stringList=setting.value(QString("Class")+QString::number(i)+"_Files").toStringList();
+//        QString configPath = setting.value(QString("Class")+QString::number(i)+"_Config").toString();
+//        std::vector<cv::Mat> some_samples= SignRecognitionToolkit::GetTrainImageCrops(stringList,configPath);
+//        for (std::vector<cv::Mat>::iterator iter = some_samples.begin();iter!=some_samples.end();++iter)
+//        {
+//            samples.push_back(SignRecognitionToolkit::GetCropFeature(*iter,SignRecognitionToolkit::PAPER_63));
+//        }
+//        cv::Mat res(some_samples.size(),ClassCount,CV_32FC1);
+//        for (int k=0;k<some_samples.size();++k)
+//        {
+//            float *p = res.ptr<float>(k);
+//            for (int m=0;m<ClassCount;++m)
+//            {
+//                p[m] = m==i?1:0;
+//            }
+//        }
+//        response.push_back(res);
+//    }
+//    setting.endGroup();
+
+////    cv::imshow("hehe",samples);
+////    cv::waitKey();
+
+//    classifier.train(samples,response,cv::Mat(),cv::Mat(),params);
+////    classifier.save(mlpFile.toStdString().c_str(),"mlp");
+//    QMessageBox::information(this,tr("Completed!"),tr("Completed mlp training!"));
+}
+
 void MainWindow::on_actionMLPTestingForSingleImage_triggered()
 {
+    cv::NeuralNet_MLP classifier;
+    QSettings setting("config.ini",QSettings::IniFormat);
+    setting.beginGroup("Classifier");
+    QString mlpFile = setting.value("MLPClassifier").toString();
+    setting.endGroup();
+    if (!mlpFile.isEmpty())
+        classifier.load(mlpFile.toStdString().c_str(),"mlp");
 
+    cv::Mat src = cv::imread(singleImagePath.toStdString());
+    std::vector<cv::Mat> crops;
+    SignRecognitionToolkit::GetTestImageCrop(src,crops);
+
+    for (int i=0;i<crops.size();++i)
+    {
+        cv::Mat feature = SignRecognitionToolkit::GetCropFeature(crops[i],SignRecognitionToolkit::PAPER_63);
+        uchar* p =crops[i].ptr<uchar>(0);
+        cv::Mat result;
+        classifier.predict(feature,result);
+        float* res = result.ptr<float>(0);
+        int nFlags = std::max_element(res,res+result.cols)-res;
+        QMessageBox::information(this,tr("result"),tr("This belongs to the ")+QString::number(nFlags+1)+tr(" th class!"));
+    }
+}
+
+void MainWindow::on_actionMLPTestingForTestData_triggered()
+{
+    cv::NeuralNet_MLP classifier;
+    QSettings setting("config.ini",QSettings::IniFormat);
+    setting.beginGroup("Classifier");
+    QString mlpFile = setting.value("MLPClassifier").toString();
+    setting.endGroup();
+    if (!mlpFile.isEmpty())
+        classifier.load(mlpFile.toStdString().c_str(),"mlp");
+
+
+    setting.beginGroup("TestDataConfig");
+    int ClassCount = setting.value("Count").toInt();
+    if (ClassCount == 0)  return;
+
+
+    int nTotal = 0;
+    int nCorect = 0;
+    for (int i=0;i<ClassCount;++i)
+    {
+        QStringList stringList=setting.value(QString("Class")+QString::number(i)+"_Files").toStringList();
+        QString configPath = setting.value(QString("Class")+QString::number(i)+"_Config").toString();
+        std::vector<cv::Mat> testobject= SignRecognitionToolkit::GetTrainImageCrops(stringList,configPath);
+        for (std::vector<cv::Mat>::iterator iter = testobject.begin();iter!=testobject.end();++iter)
+        {
+            cv::Mat result;
+            cv::Mat feature = SignRecognitionToolkit::GetCropFeature(*iter,SignRecognitionToolkit::PAPER_63);
+            classifier.predict(feature,result);
+            float* res = result.ptr<float>(0);
+            int nFlags = std::max_element(res,res+result.cols)-res;
+
+            if (nFlags == i)
+                ++nCorect;
+            ++nTotal;
+        }
+    }
+    setting.endGroup();
+
+    QMessageBox::information(this,tr("result"),QString("correct: ")+QString::number(nCorect)+"/"+QString::number(nTotal)+"="+QString::number(nCorect*100/nTotal)+"%");
 }

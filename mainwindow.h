@@ -29,11 +29,16 @@ private slots:
     void on_actionLastImage_triggered();
     void on_actionTestCanny_triggered();
     void on_actionSetTrainData_triggered();
+    void on_actionSetTestData_triggered();
     void on_actionBrowseTestSet_triggered();
     void on_actionSVMTraining_triggered();
     void on_actionOpenSingleImage_triggered();
     void on_actionSVMTestingForSingleImage_triggered();
     void on_actionMLPTestingForSingleImage_triggered();
+    void on_actionMLPTraining_triggered();
+
+
+    void on_actionMLPTestingForTestData_triggered();
 
 private:
     Ui::MainWindow *ui;

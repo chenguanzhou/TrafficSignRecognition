@@ -7,8 +7,9 @@
 #include <QList>
 #include "SignRecognitionToolkit.h"
 
-TrainTab::TrainTab(QWidget *parent) :
+TrainTab::TrainTab(bool isTraining, QWidget *parent) :
     QWidget(parent),
+    isTrain(isTraining),
     ui(new Ui::TrainTab)
 {
     ui->setupUi(this);
@@ -65,7 +66,10 @@ void TrainTab::on_pushButton_clicked()
     QString imageDirString;
     QSettings setting("config.ini",QSettings::IniFormat);
     setting.beginGroup("Directory");
-    imageDirString = setting.value("TrainSetDir").toString();
+    if (isTrain)
+        imageDirString = setting.value("TrainSetDir").toString();
+    else
+        imageDirString = setting.value("TestSetDir").toString();
     setting.endGroup();
 
     QStringList fileList = QFileDialog::getOpenFileNames(this,tr("Add image files"),imageDirString,tr("Image Files(*.bmp *.jpg *.ppm *.png)"));
