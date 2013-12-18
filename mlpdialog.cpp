@@ -5,8 +5,9 @@
 #include <QMessageBox>
 #include "SignRecognitionToolkit.h"
 
-MLPDialog::MLPDialog(QWidget *parent) :
+MLPDialog::MLPDialog(cv::PCA &p, QWidget *parent) :
     QDialog(parent),
+    pca(p),
     ui(new Ui::MLPDialog)
 {
     ui->setupUi(this);
@@ -39,15 +40,7 @@ void MLPDialog::on_buttonBox_accepted()
     int layers = ui->spinBoxLayers->value();
     int eachLayerCount = ui->spinBoxEachLayerCounts->value();
 
-    std::vector<int> layersize;
-    layersize.push_back(63);
-    layersize.insert(layersize.end(),layers,eachLayerCount);
-    layersize.push_back(ClassCount);
-    cv::Mat layerSizes(1,layersize.size(),CV_32SC1);
-    int *pMat = layerSizes.ptr<int>(0);
-    std::copy(layersize.begin(),layersize.end(),pMat);
-//    std::cout<<layerSizes<<std::endl;
-    classifier.create(layerSizes,ui->comboBoxActivationFunction->currentIndex());
+
 
 
     cv::Mat samples;
@@ -64,7 +57,7 @@ void MLPDialog::on_buttonBox_accepted()
         QString configPath = setting.value(QString("Class")+QString::number(i)+"_Config").toString();
         std::vector<cv::Mat> some_samples= SignRecognitionToolkit::GetTrainImageCrops(stringList,configPath);
         for (std::vector<cv::Mat>::iterator iter = some_samples.begin();iter!=some_samples.end();++iter)
-        {            
+        {
             cv::Mat feature = SignRecognitionToolkit::GetCropFeature(*iter,SignRecognitionToolkit::PAPER_63).clone();
             samples.push_back(feature);
         }
@@ -80,6 +73,27 @@ void MLPDialog::on_buttonBox_accepted()
         response.push_back(res);
     }
     setting.endGroup();
+
+
+    std::vector<int> layersize;
+
+    if (use_pca && pca_count<=63)
+    {
+        pca = cv::PCA(samples,cv::Mat(),CV_PCA_DATA_AS_ROW,pca_count);
+        samples = pca.project(samples);
+        std::cout<<"pca:"<<pca_count<<std::endl;
+        layersize.push_back(pca_count);
+    }
+    else
+        layersize.push_back(63);
+
+    layersize.insert(layersize.end(),layers,eachLayerCount);
+    layersize.push_back(ClassCount);
+    cv::Mat layerSizes(1,layersize.size(),CV_32SC1);
+    int *pMat = layerSizes.ptr<int>(0);
+    std::copy(layersize.begin(),layersize.end(),pMat);
+    //    std::cout<<layerSizes<<std::endl;
+    classifier.create(layerSizes,ui->comboBoxActivationFunction->currentIndex());
 
     classifier.train(samples,response,cv::Mat(),cv::Mat(),params);
     classifier.save(mlpFile.toStdString().c_str(),"mlp");
@@ -110,7 +124,22 @@ void MLPDialog::InitUI()
         return;
     }
 
-    ui->lineEditInputLayerCount->setText(QString::number(63));
+    setting.endGroup();
+    setting.beginGroup("PCA");
+    use_pca = setting.value("use_pca").toBool();
+    pca_count = setting.value("pca").toInt();
+    //    if (pca_count<=ClassCount)
+    //    {
+    //        pca.computeVar(samples,cv::Mat(),CV_PCA_DATA_AS_ROW,pca_count);
+    //        samples = pca.project(samples);
+    //    }
+
+
+    setting.endGroup();
+    if (use_pca && pca_count<=63)
+        ui->lineEditInputLayerCount->setText(QString::number(pca_count));
+    else
+        ui->lineEditInputLayerCount->setText(QString::number(63));
     ui->lineEditOutputLayerCount->setText(QString::number(ClassCount));
 }
 

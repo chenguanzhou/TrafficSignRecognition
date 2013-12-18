@@ -13,7 +13,6 @@
 #include "traindialog.h"
 #include "mlpdialog.h"
 #include "languagedialog.h"
-#include <opencv2/opencv.hpp>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -29,11 +28,13 @@ MainWindow::MainWindow(QWidget *parent) :
     lineEditCurrentID->setReadOnly(true);
     ui->navigatorToolBar->insertWidget(ui->actionNextImage, lineEditCurrentID);
 
-
-
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(on_animate()));
 
+    QSettings setting("config.ini",QSettings::IniFormat);
+    setting.beginGroup("PCA");
+    use_pca = setting.value("use_pca").toBool();
+    pca_count = setting.value("pca").toInt();
 }
 
 MainWindow::~MainWindow()
@@ -143,6 +144,10 @@ void MainWindow::ShowCurrentImage()
             cv::Mat feature = SignRecognitionToolkit::GetCropFeature(crops[i],SignRecognitionToolkit::PAPER_63);
             uchar* p =crops[i].ptr<uchar>(0);
             cv::Mat result;
+            if (use_pca&&pca_count<feature.cols)
+            {
+                feature = pca.project(feature);
+            }
             classifier.predict(feature,result);
             float* res = result.ptr<float>(0);
             int nFlags = std::max_element(res,res+result.cols)-res;
@@ -324,6 +329,10 @@ void MainWindow::on_actionSVMTestingForSingleImage_triggered()
         cv::Mat feature = SignRecognitionToolkit::GetCropFeature(crops[i],SignRecognitionToolkit::PAPER_63);
         uchar* p =crops[i].ptr<uchar>(0);
 
+        if (use_pca&&pca_count<feature.cols)
+        {
+            feature = pca.project(feature);
+        }
         int nFlag = classifier.predict(feature);
         QMessageBox::information(this,tr("result"),tr("This belongs to the ")+QString::number(nFlag+1)+tr("th class!"));
     }
@@ -357,7 +366,7 @@ void MainWindow::on_actionMLPTraining_triggered()
 //        return;
 //    }
 
-    MLPDialog *dlg = new MLPDialog();
+    MLPDialog *dlg = new MLPDialog(pca);
     dlg->show();
 //    cv::NeuralNet_MLP classifier = dlg.GetMLPClassifier();
 //    cv::ANN_MLP_TrainParams params = dlg.GetMLPParam();
@@ -413,6 +422,10 @@ void MainWindow::on_actionMLPTestingForSingleImage_triggered()
         cv::Mat feature = SignRecognitionToolkit::GetCropFeature(crops[i],SignRecognitionToolkit::PAPER_63);
         uchar* p =crops[i].ptr<uchar>(0);
         cv::Mat result;
+        if (use_pca&&pca_count<feature.cols)
+        {
+            feature = pca.project(feature);
+        }
         classifier.predict(feature,result);
         float* res = result.ptr<float>(0);
         int nFlags = std::max_element(res,res+result.cols)-res;
@@ -447,7 +460,11 @@ void MainWindow::on_actionMLPTestingForTestData_triggered()
         {
             cv::Mat result;
             cv::Mat feature = SignRecognitionToolkit::GetCropFeature(*iter,SignRecognitionToolkit::PAPER_63);
-            classifier.predict(feature,result);
+            if (use_pca&&pca_count<=63)
+            {
+                feature = pca.project(feature);
+            }
+                classifier.predict(feature,result);
             float* res = result.ptr<float>(0);
             int nFlags = std::max_element(res,res+result.cols)-res;
 

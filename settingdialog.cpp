@@ -35,6 +35,12 @@ void SettingDialog::ReadParams()
         ui->lineEditMLP->setText(path);
     }
     setting.endGroup();
+    setting.beginGroup("PCA");
+    {
+        ui->spinBox->setValue(setting.value("pca").toInt());
+        ui->checkBoxPCA->setChecked(setting.value("use_pca").toBool());
+    }
+    setting.endGroup();
 }
 
 void SettingDialog::WriteParams()
@@ -50,6 +56,12 @@ void SettingDialog::WriteParams()
     {
         setting.setValue("SVMClassifier",ui->lineEditSVM->text());
         setting.setValue("MLPClassifier",ui->lineEditMLP->text());
+    }
+    setting.endGroup();
+    setting.beginGroup("PCA");
+    {
+        setting.setValue("pca",ui->spinBox->value());
+        setting.setValue("use_pca",ui->checkBoxPCA->isChecked());
     }
     setting.endGroup();
 }

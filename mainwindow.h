@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QGraphicsScene>
+#include <opencv2/opencv.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -48,6 +49,9 @@ private:
     QTimer *timer;
     int imageListID;
     QString singleImagePath;
+    cv::PCA pca;
+    bool use_pca;
+    int pca_count;
 
     void ShowCurrentImage();
     void resizeEvent(QResizeEvent *event);
