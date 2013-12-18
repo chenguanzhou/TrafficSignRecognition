@@ -2,6 +2,7 @@
 #include <iostream>
 #include <ctime>
 #include <QMessageBox>
+#include <QFileInfo>
 
 SignRecognitionToolkit::SignRecognitionToolkit()
 {
@@ -49,7 +50,7 @@ void SignRecognitionToolkit::GetTestImageCrop(const cv::Mat &inputImage, std::ve
 
 
 
-//    cv::Canny(red,red,50,200);
+    //    cv::Canny(red,red,50,200);
 
 
     std::vector<std::vector<cv::Point> > contours;
@@ -70,7 +71,7 @@ void SignRecognitionToolkit::GetTestImageCrop(const cv::Mat &inputImage, std::ve
         {
             minEllipse.push_back(ellipse);
             CvScalar color;
-            color.val[0]=255;color.val[1]=0;color.val[2]=0;
+            color.val[0]=255;color.val[1]=255;color.val[2]=0;
             cv::ellipse(red,ellipse,color,2);
         }
     }
@@ -125,7 +126,7 @@ std::vector<cv::Mat> SignRecognitionToolkit::GetTrainImageCrops(const QStringLis
         bool isValid = false;
         int fileNameID = inputFileList.indexOf(QRegExp(imageName) );
         if (fileNameID==-1) continue;
-        imageName = inputFileList[fileNameID];
+        imageName = QDir::fromNativeSeparators(inputFileList[fileNameID]);
         int nYOff = paraList[3].toInt(&isValid);if (isValid==false) continue;
         int nXOff = paraList[4].toInt(&isValid);if (isValid==false) continue;
         int nYEnd = paraList[5].toInt(&isValid);if (isValid==false) continue;
@@ -138,52 +139,74 @@ std::vector<cv::Mat> SignRecognitionToolkit::GetTrainImageCrops(const QStringLis
         //        cv::waitKey(1000);
         listMat.push_back(dst);
     }
+    return listMat;
 }
 
 cv::Mat SignRecognitionToolkit::GetCropFeature(const cv::Mat &crop, FeatureMethod method)
-{
-    cv::Mat feature;
+{    
     if (method == PAPER_63)
     {
-        feature = cv::Mat(1,63,CV_32FC1);
-        float* p = feature.ptr<float>(0);
-        std::vector<cv::Mat> vecCrop;
-        cv::split(crop,vecCrop);
-        *p++ = cv::mean(vecCrop[2])[0]/256.;//MR
-        *p++ = cv::mean(vecCrop[1])[0]/256.;//MG
-        *p++ = cv::mean(vecCrop[0])[0]/256.;//MB
+        cv::Mat feature(1,63,CV_32FC1);
+//        std::vector<cv::Mat> vecCrop;
+//        cv::split(crop,vecCrop);\
 
-        cv::Mat gray = vecCrop[2]*0.49 + vecCrop[1]*0.29 + vecCrop[2]*0.22;
-        //        cv::imshow("hehe",gray);
-        //        cv::waitKey();
+        cv::Mat gray(30,30,CV_8UC1);
+        float r(0),g(0),b(0);
+        for (int i=0;i<30;++i)
+        {
+            for (int j=0;j<30;++j)
+            {
+                cv::Vec3b pixel = crop.at<cv::Vec3b>(i, j);
+                r += pixel[2];
+                g += pixel[1];
+                b += pixel[0];
+                gray = pixel[2]*0.49+pixel[1]*0.29+pixel[2]*0.22;
+            }
+        }
+
+        feature.at<float>(0,0) = r/900./256.;
+        feature.at<float>(0,1) = g/900./256.;
+        feature.at<float>(0,2) = b/900./256.;
+
+//        feature.at<float>(0,0) = cv::mean(vecCrop[2])[0]/256.;//MR
+//        feature.at<float>(0,1) = cv::mean(vecCrop[1])[0]/256.;//MG
+//        feature.at<float>(0,2) = cv::mean(vecCrop[0])[0]/256.;//MB
+
+//        cv::Mat gray = vecCrop[2]*0.49 + vecCrop[1]*0.29 + vecCrop[2]*0.22;
+
         float treshold = cv::mean(gray)[0];
-        //vh
-        for (int i=0;i<30;++i)
-        {
-            float vh = 0;
-            for (int j=0;j<30;++j)
-            {
-                float dn = gray.at<uchar>(i,j);
-                if (dn>treshold)
-                    vh += treshold;
-            }
-            *p++ = vh/30./256.;
-        }
 
         for (int i=0;i<30;++i)
         {
             float vh = 0;
             for (int j=0;j<30;++j)
             {
-                float dn = gray.at<uchar>(j,i);
+                uchar dn = gray.at<uchar>(i,j);
                 if (dn>treshold)
-                    vh += treshold;
+                    vh += dn;
             }
-            *p++ = vh/30./256.;
+            feature.at<float>(0,i+3) = vh/30./256.;
         }
+
+        for (int i=0;i<30;++i)
+        {
+            if (i==29)
+            {
+                int cgz=0;
+            }
+            float vh = 0;
+            for (int j=0;j<30;++j)
+            {
+                uchar dn = gray.at<uchar>(j,i);
+                if (dn>treshold)
+                    vh += dn;
+            }
+            feature.at<float>(0,i+33) = vh/30./256.;
+        }
+        return feature;
     }
 
-    return feature;
+    return cv::Mat();
 }
 
 cv::Mat SignRecognitionToolkit::CreateFeatureMat(const QVector<cv::Mat> &crops)

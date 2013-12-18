@@ -19,7 +19,6 @@ public:
     ~MLPDialog();
 
     cv::ANN_MLP_TrainParams GetMLPParam();
-    cv::NeuralNet_MLP GetMLPClassifier();
 
 private slots:
     void on_comboBoxTrainingMethod_currentIndexChanged(int index);

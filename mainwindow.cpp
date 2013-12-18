@@ -12,6 +12,8 @@
 #include "SignRecognitionToolkit.h"
 #include "traindialog.h"
 #include "mlpdialog.h"
+#include "languagedialog.h"
+#include <opencv2/opencv.hpp>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -244,16 +246,18 @@ void MainWindow::on_actionSVMTraining_triggered()
 void MainWindow::on_actionOpenSingleImage_triggered()
 {
     singleImagePath = QFileDialog::getOpenFileName(this,tr("Open an image file"),singleImagePath,"*.bmp *.jpg *.ppm *.png");
+    singleImagePath = QDir::fromNativeSeparators(singleImagePath);
     if (!singleImagePath.isEmpty())
     {
-        QImage image(singleImagePath);
+        QPixmap image(singleImagePath);
+//        cv::Mat src = cv::imread(QDir::fromNativeSeparators(singleImagePath));
         if (image.isNull() == true)
         {
             QMessageBox::warning(this,tr("Error"),tr("Open image file ")+singleImagePath+tr(" failed"));
             return ;
         }
         graphicsScene->clear();
-        QGraphicsPixmapItem *item= new QGraphicsPixmapItem( QPixmap::fromImage(image));
+        QGraphicsPixmapItem *item= new QGraphicsPixmapItem( /*QPixmap::fromImage(*/image/*)*/);
         graphicsScene->addItem(item);
         ui->graphicsView->fitInView(item,Qt::KeepAspectRatio);
         SetEnableNavigateActions(false);
@@ -372,7 +376,7 @@ void MainWindow::on_actionMLPTestingForSingleImage_triggered()
         classifier.predict(feature,result);
         float* res = result.ptr<float>(0);
         int nFlags = std::max_element(res,res+result.cols)-res;
-        QMessageBox::information(this,tr("result"),tr("This belongs to the ")+QString::number(nFlags+1)+tr(" th class!"));
+        QMessageBox::information(this,tr("result"),tr("This belongs to the ")+QString::number(nFlags+1)+tr("th class!"));
     }
 }
 
@@ -415,4 +419,10 @@ void MainWindow::on_actionMLPTestingForTestData_triggered()
     setting.endGroup();
 
     QMessageBox::information(this,tr("result"),QString("correct: ")+QString::number(nCorect)+"/"+QString::number(nTotal)+"="+QString::number(nCorect*100/nTotal)+"%");
+}
+
+void MainWindow::on_actionLanguage_triggered()
+{
+    LanguageDialog* dlg = new LanguageDialog();
+    dlg->show();
 }

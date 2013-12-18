@@ -43,8 +43,10 @@ void MLPDialog::on_buttonBox_accepted()
     layersize.push_back(63);
     layersize.insert(layersize.end(),layers,eachLayerCount);
     layersize.push_back(ClassCount);
-    cv::Mat layerSizes(1,layersize.size(),CV_32SC1,&layersize[0]);
-    std::cout<<layerSizes<<std::endl;
+    cv::Mat layerSizes(1,layersize.size(),CV_32SC1);
+    int *pMat = layerSizes.ptr<int>(0);
+    std::copy(layersize.begin(),layersize.end(),pMat);
+//    std::cout<<layerSizes<<std::endl;
     classifier.create(layerSizes,ui->comboBoxActivationFunction->currentIndex());
 
 
@@ -62,8 +64,9 @@ void MLPDialog::on_buttonBox_accepted()
         QString configPath = setting.value(QString("Class")+QString::number(i)+"_Config").toString();
         std::vector<cv::Mat> some_samples= SignRecognitionToolkit::GetTrainImageCrops(stringList,configPath);
         for (std::vector<cv::Mat>::iterator iter = some_samples.begin();iter!=some_samples.end();++iter)
-        {
-            samples.push_back(SignRecognitionToolkit::GetCropFeature(*iter,SignRecognitionToolkit::PAPER_63));
+        {            
+            cv::Mat feature = SignRecognitionToolkit::GetCropFeature(*iter,SignRecognitionToolkit::PAPER_63).clone();
+            samples.push_back(feature);
         }
         cv::Mat res(some_samples.size(),ClassCount,CV_32FC1);
         for (int k=0;k<some_samples.size();++k)
@@ -134,7 +137,4 @@ cv::ANN_MLP_TrainParams MLPDialog::GetMLPParam()
     }
     return param;
 }
-cv::NeuralNet_MLP MLPDialog::GetMLPClassifier()
-{
 
-}

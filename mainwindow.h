@@ -10,6 +10,7 @@ class MainWindow;
 
 class QFileInfo;
 class QLineEdit;
+class QStandardItem;
 
 class MainWindow : public QMainWindow
 {
@@ -40,11 +41,14 @@ private slots:
 
     void on_actionMLPTestingForTestData_triggered();
 
+    void on_actionLanguage_triggered();
+
 private:
     Ui::MainWindow *ui;
     QLineEdit* lineEditCurrentID;
     QGraphicsScene *graphicsScene;
     QList<QFileInfo> imageFileList;
+
     QTimer *timer;
     int imageListID;
     QString singleImagePath;
