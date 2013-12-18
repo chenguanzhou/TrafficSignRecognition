@@ -10,7 +10,7 @@ class MainWindow;
 
 class QFileInfo;
 class QLineEdit;
-class QStandardItem;
+class QStandardItemModal;
 
 class MainWindow : public QMainWindow
 {
@@ -37,10 +37,7 @@ private slots:
     void on_actionSVMTestingForSingleImage_triggered();
     void on_actionMLPTestingForSingleImage_triggered();
     void on_actionMLPTraining_triggered();
-
-
     void on_actionMLPTestingForTestData_triggered();
-
     void on_actionLanguage_triggered();
 
 private:
@@ -48,7 +45,6 @@ private:
     QLineEdit* lineEditCurrentID;
     QGraphicsScene *graphicsScene;
     QList<QFileInfo> imageFileList;
-
     QTimer *timer;
     int imageListID;
     QString singleImagePath;

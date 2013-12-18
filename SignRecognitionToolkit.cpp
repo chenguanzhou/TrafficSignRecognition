@@ -76,7 +76,7 @@ void SignRecognitionToolkit::GetTestImageCrop(const cv::Mat &inputImage, std::ve
         }
     }
 
-    cv::imshow("red",red);
+//    cv::imshow("red",red);
 
     qDebug()<<"minEllipse.size():"<<minEllipse.size();
     vecCropImage.clear();

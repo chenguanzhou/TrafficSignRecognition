@@ -29,8 +29,11 @@ MainWindow::MainWindow(QWidget *parent) :
     lineEditCurrentID->setReadOnly(true);
     ui->navigatorToolBar->insertWidget(ui->actionNextImage, lineEditCurrentID);
 
+
+
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(on_animate()));
+
 }
 
 MainWindow::~MainWindow()
@@ -70,7 +73,7 @@ void MainWindow::on_actionAnimation_toggled(bool arg1)
 {
     if (arg1==true)
     {
-        timer->start(25);
+        timer->start(50);
         ui->actionAnimation->setToolTip(tr("Pause"));
     }
     else
@@ -115,6 +118,43 @@ void MainWindow::ShowCurrentImage()
     graphicsScene->addItem(item);
     ui->graphicsView->fitInView((QGraphicsItem *)item,Qt::KeepAspectRatio);
     lineEditCurrentID->setText(QString().number(imageListID+1)+"/"+QString().number(imageFileList.size()));
+
+
+    static int hehe = 0;
+    hehe++;
+    if (ui->actionMLPDynamicTraining->isChecked() && hehe%10==0)
+    {
+        cv::NeuralNet_MLP classifier;
+        QSettings setting("config.ini",QSettings::IniFormat);
+        setting.beginGroup("Classifier");
+        QString mlpFile = setting.value("MLPClassifier").toString();
+        setting.endGroup();
+        if (!mlpFile.isEmpty())
+            classifier.load(mlpFile.toStdString().c_str(),"mlp");
+
+        cv::Mat src = cv::imread(QDir::fromNativeSeparators(imageFileList.at(imageListID).filePath()).toStdString());
+        std::vector<cv::Mat> crops;
+        SignRecognitionToolkit::GetTestImageCrop(src,crops);
+
+        ui->listWidget->clear();
+
+        for (int i=0;i<crops.size();++i)
+        {
+            cv::Mat feature = SignRecognitionToolkit::GetCropFeature(crops[i],SignRecognitionToolkit::PAPER_63);
+            uchar* p =crops[i].ptr<uchar>(0);
+            cv::Mat result;
+            classifier.predict(feature,result);
+            float* res = result.ptr<float>(0);
+            int nFlags = std::max_element(res,res+result.cols)-res;
+            if (res[nFlags]<0.7)
+                continue;
+
+            cv::imwrite("temp.bmp",crops[i]);
+            ui->listWidget->addItem(new QListWidgetItem(QIcon("temp.bmp"),tr("The ")+QString::number(nFlags+1)+tr("th class")));
+        }
+    }
+
+
     ++imageListID;
 }
 
@@ -426,3 +466,4 @@ void MainWindow::on_actionLanguage_triggered()
     LanguageDialog* dlg = new LanguageDialog();
     dlg->show();
 }
+

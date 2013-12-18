@@ -23,7 +23,7 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QListView" name="listView">
+     <widget class="QListWidget" name="listWidget">
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -35,12 +35,6 @@
         <width>200</width>
         <height>16777215</height>
        </size>
-      </property>
-      <property name="movement">
-       <enum>QListView::Static</enum>
-      </property>
-      <property name="flow">
-       <enum>QListView::TopToBottom</enum>
       </property>
       <property name="viewMode">
        <enum>QListView::IconMode</enum>
@@ -77,6 +71,7 @@
     <addaction name="actionAnimation"/>
     <addaction name="actionFirstImage"/>
     <addaction name="actionLastImage"/>
+    <addaction name="actionMLPDynamicTraining"/>
    </widget>
    <widget class="QMenu" name="menuTest">
     <property name="title">
@@ -119,6 +114,7 @@
    <addaction name="actionAnimation"/>
    <addaction name="actionNextImage"/>
    <addaction name="actionLastImage"/>
+   <addaction name="actionMLPDynamicTraining"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -275,6 +271,14 @@
   <action name="actionMLPTestingForTestData">
    <property name="text">
     <string>MLP Testing For TestData</string>
+   </property>
+  </action>
+  <action name="actionMLPDynamicTraining">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MLP Dynamic Training</string>
    </property>
   </action>
  </widget>
