@@ -92,7 +92,7 @@ void MLPDialog::on_buttonBox_accepted()
     cv::Mat layerSizes(1,layersize.size(),CV_32SC1);
     int *pMat = layerSizes.ptr<int>(0);
     std::copy(layersize.begin(),layersize.end(),pMat);
-    //    std::cout<<layerSizes<<std::endl;
+    std::cout<<layerSizes<<std::endl;
     classifier.create(layerSizes,ui->comboBoxActivationFunction->currentIndex());
 
     classifier.train(samples,response,cv::Mat(),cv::Mat(),params);
